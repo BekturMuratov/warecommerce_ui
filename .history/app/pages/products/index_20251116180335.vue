@@ -68,7 +68,7 @@ async function load() {
 
       <template #item="{ item }">
         <tr>
-          <td>{{ item.name }}</td>
+          <td>{{ item.title }}</td>
           <td>{{ item.sku }}</td>
           <td>{{ item.arrival_date }}</td>
         </tr>

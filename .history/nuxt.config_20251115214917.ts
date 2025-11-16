@@ -2,20 +2,13 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-
-  css: ['vuetify/styles'],
-
+  css: [
+    'vuetify/styles'
+  ],
+  plugins: [
+    '@pinia/nuxt'
+  ],
   build: {
     transpile: ['vuetify'],
-  },
-
-  modules: [
-    '@pinia/nuxt',   // ✅ ВАЖНО!
-  ],
-
-  runtimeConfig: {
-    public: {
-      API_URL: process.env.NUXT_PUBLIC_API_URL
-    }
   }
 })

@@ -3,7 +3,7 @@ definePageMeta({
   layout: 'default'
 })
 
-import { useProductsStore } from '../../stores/products.js'
+import { useProductsStore } from '~/stores/products'
 
 const store = useProductsStore()
 
@@ -46,8 +46,9 @@ async function load() {
       </v-col>
 
       <v-col>
-      
+        <client-only>
           <PdfProductLoader />
+        </client-only>
       </v-col>
     </v-row>
 
@@ -68,7 +69,7 @@ async function load() {
 
       <template #item="{ item }">
         <tr>
-          <td>{{ item.name }}</td>
+          <td>{{ item.title }}</td>
           <td>{{ item.sku }}</td>
           <td>{{ item.arrival_date }}</td>
         </tr>

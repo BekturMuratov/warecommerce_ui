@@ -1,35 +1,26 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'default'
+ layout: 'default'
 })
-
-import { useProductsStore } from '../../stores/products.js'
-
-const store = useProductsStore()
-
-const products = computed(() => store.products)
-const totalItems = computed(() => store.total)
+const products = ref<any[]>([])
+const totalItems = ref(0)
 
 const dates = reactive({
-  from: null as string | null,
-  to: null as string | null
+  from: null as string|null,
+  to: null as string|null
 })
 
 const page = ref(1)
 const itemsPerPage = 10
 
-watch([page, () => dates.from, () => dates.to], load)
+watch([page, ()=>dates.from, ()=>dates.to], load)
 
 onMounted(load)
 
 async function load() {
-  await store.fetchProducts({
-    page: page.value,
-    pageSize: itemsPerPage,
-    startBegin: dates.from || undefined,
-    startEnd: dates.to || undefined
-  })
+ 
 }
+
 </script>
 
 <template>
@@ -40,14 +31,11 @@ async function load() {
       <v-col cols="12" sm="4">
         <v-text-field type="date" v-model="dates.from" label="Дата с"/>
       </v-col>
-
       <v-col cols="12" sm="4">
         <v-text-field type="date" v-model="dates.to" label="Дата по"/>
       </v-col>
-
       <v-col>
-      
-          <PdfProductLoader />
+        <PdfProductLoader />
       </v-col>
     </v-row>
 
@@ -68,9 +56,9 @@ async function load() {
 
       <template #item="{ item }">
         <tr>
-          <td>{{ item.name }}</td>
+          <td>{{ item.title }}</td>
           <td>{{ item.sku }}</td>
-          <td>{{ item.arrival_date }}</td>
+          <td>{{ item.createdAt }}</td>
         </tr>
       </template>
     </v-data-table>

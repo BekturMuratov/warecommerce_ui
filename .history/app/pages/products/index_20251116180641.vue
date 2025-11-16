@@ -7,7 +7,7 @@ import { useProductsStore } from '../../stores/products.js'
 
 const store = useProductsStore()
 
-const products = computed(() => store.products)
+const products = computed(() => store.products.data)
 const totalItems = computed(() => store.total)
 
 const dates = reactive({
@@ -68,7 +68,7 @@ async function load() {
 
       <template #item="{ item }">
         <tr>
-          <td>{{ item.name }}</td>
+          <td>{{ item.title }}</td>
           <td>{{ item.sku }}</td>
           <td>{{ item.arrival_date }}</td>
         </tr>
