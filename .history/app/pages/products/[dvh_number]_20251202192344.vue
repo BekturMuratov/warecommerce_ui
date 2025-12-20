@@ -1,0 +1,87 @@
+<template>
+ <v-container>
+   <v-card>
+     <v-card-title>Товары для DVH: {{ route.params.dvh_number }}</v-card-title>
+
+     <v-card-text>
+      <v-btn
+          color="primary"
+          @click="generatePDF"
+          class="mb-4"
+        >
+          Сформировать PDF (Акт приема)
+        </v-btn>
+
+       <v-data-table
+         :items="products"
+         :loading="loading"
+         class="elevation-1"
+         :items-per-page="10"
+       >
+         <template #headers>
+           <tr>
+             <th>ID</th>
+             <th>Наименование</th>
+             <th>TNVED</th>
+             <th>Вес</th>
+             <th>Количество</th>
+             <th>Цена</th>
+             <th>Валюта</th>
+             <th>Владелец</th>
+             <th>Дата прибытия</th>
+             <th>Дата убытия</th>
+             <th>Склад</th>
+           </tr>
+         </template>
+
+         <template #item="{ item }">
+           <tr>
+             <td>{{ item.id }}</td>
+             <td>{{ item.name }}</td>
+             <td>{{ item.tnved_code }}</td>
+             <td>{{ item.weight }}</td>
+             <td>{{ item.quantity }}</td>
+             <td>{{ item.price }}</td>
+             <td>{{ item.currency }}</td>
+             <td>{{ item.product_owner }}</td>
+             <td>{{ new Date(item.arrival_date).toLocaleDateString() }}</td>
+             <td>{{ item.departure_date ? new Date(item.departure_date).toLocaleDateString() : '-' }}</td>
+             <td>{{ item.warehouseId }}</td>
+           </tr>
+         </template>
+       </v-data-table>
+     </v-card-text>
+   </v-card>
+ </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import ProductService from '@/services/ProductServices.js'
+import type { Product } from '~/types/products'
+
+const route = useRoute()
+const products = ref<Product[]>([])
+const loading = ref(false)
+
+// Загружаем товары для выбранного DVH
+async function loadProducts() {
+ loading.value = true
+ try {
+   const dvh_number = route.params.dvh_number as string
+   const data: Product[] = await ProductService.getDvhDetail(dvh_number)
+   products.value = data
+ } catch (err) {
+   console.error('Ошибка загрузки продуктов:', err)
+ } finally {
+   loading.value = false
+ }
+}
+
+
+
+
+
+onMounted(loadProducts)
+</script>
