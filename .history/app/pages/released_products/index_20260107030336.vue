@@ -159,7 +159,7 @@ const sendProductsToServer = async () => {
               <v-text-field v-model="endDate" type="date" label="Конец периода" />
             </v-col>
             <v-col cols="12">
-              <v-btn color="primary" block @click="loadDvhList">Применить</v-btn>
+              <v-btn block @click="loadDvhList">Применить</v-btn>
             </v-col>
           </v-row>
         </v-card-text>

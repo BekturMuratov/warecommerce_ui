@@ -250,44 +250,37 @@
   // 🚀 ВЫПУСК ТОВАРОВ
   // -----------------------------
   async function submitRelease() {
-  // Проверяем все обязательные поля
-  if (
-    !selectedTariff.value ||              // тариф выбран
-    !declarationNumber.value ||           // номер декларации заполнен
-    selectedProducts.value.length === 0   // есть выбранные товары
-  ) {
-    alert('Заполните все поля и выберите товары');
-    return;
+    if (
+      !selectedTariff.value ||
+      !declarationNumber.value ||
+      selectedProducts.value.length === 0
+    ) {
+      alert('Заполните все поля и выберите товары')
+      return
+    }
+  
+    try {
+      const payload = {
+        ids: selectedProducts.value,
+        operator: 'current_user', // можно заменить на пользователя из auth
+        transit_declaration_number: declarationNumber.value,
+      }
+  
+      await ProductService.releaseProducts(payload)
+  
+      alert('Товары успешно выпущены!')
+      releaseDialog.value = false
+  
+      await loadProducts()
+  
+      selectedProducts.value = []
+      selectedTariff.value = null
+      declarationNumber.value = ''
+    } catch (err) {
+      console.error('Ошибка выпуска товаров:', err)
+      alert('Ошибка выпуска товаров')
+    }
   }
-
-  try {
-    // Формируем payload под наш новый контроллер
-    const payload = {
-      ids: selectedProducts.value,               // массив id выбранных товаров
-      operator: 'current_user',                  // TODO: заменить на реального пользователя из auth
-      tariffId: Number(selectedTariff.value),    // обязательно number, не объект
-      transit_declaration_number: declarationNumber.value,
-    };
-
-    // Отправляем на сервер
-    await ProductService.releaseProducts(payload);
-
-    alert('Товары успешно выпущены!');
-    releaseDialog.value = false;
-
-    // Обновляем таблицу товаров после выпуска
-    await loadProducts();
-
-    // Сбрасываем форму
-    selectedProducts.value = [];
-    selectedTariff.value = null;
-    declarationNumber.value = '';
-  } catch (err) {
-    console.error('Ошибка выпуска товаров:', err);
-    alert('Ошибка выпуска товаров');
-  }
-}
-
   
   // -----------------------------
   // 📄 PDF

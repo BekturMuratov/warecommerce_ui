@@ -158,8 +158,13 @@ const sendProductsToServer = async () => {
             <v-col cols="6">
               <v-text-field v-model="endDate" type="date" label="Конец периода" />
             </v-col>
-            <v-col cols="12">
-              <v-btn color="primary" block @click="loadDvhList">Применить</v-btn>
+            <v-col cols="6">
+              <v-btn block @click="loadDvhList">Применить</v-btn>
+            </v-col>
+            <v-col cols="6">
+              <v-btn block color="primary" @click="isDialogOpen = true">
+                Открыть PDF
+              </v-btn>
             </v-col>
           </v-row>
         </v-card-text>

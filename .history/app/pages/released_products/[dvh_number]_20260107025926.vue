@@ -32,7 +32,6 @@
              <th>Дата убытия</th>
              <th>Склад</th>
              <th>Итого за хранение</th>
-             <th>Кол-во дней на складе</th>
            </tr>
          </template>
 
@@ -50,7 +49,6 @@
              <td>{{ item.departure_date ? new Date(item.departure_date).toLocaleDateString() : '-' }}</td>
              <td>{{ item.warehouseId }}</td>
              <td>{{ item.price_for_storage }}</td>
-             <td>{{ item.count_of_days_in_storage }}</td>
            </tr>
          </template>
        </v-data-table>
