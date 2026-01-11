@@ -41,10 +41,11 @@
       const data: any = await ProductService.getDvhList({
         pageNumber: pagination.value.currentPage,
         pageSize: pagination.value.pageSize,
-        startDate: startDate.value,
-        endDate: endDate.value
+        startDate: startDate.value + "T00:00:00Z",
+        endDate: endDate.value + "T23:59:59Z"
       })
       dvhList.value = data.data
+      console.log('dvhList: ', dvhList.value)
       pagination.value.totalItems = data.pagination.totalItems
     } catch (e) {
       console.error(e)
