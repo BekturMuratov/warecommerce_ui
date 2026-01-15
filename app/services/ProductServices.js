@@ -73,6 +73,19 @@ class ProductService {
       console.error('Ошибка генерации PDF:', error);
       throw error;
     }
+  }  
+  async generateReleasedPdf(dvh_number) {
+    const api = this.getApiUrl();
+    try {
+      const response = await axios.get(`${api}/products/generate-released-pdf/${dvh_number}`, {
+        headers: authHeader(),
+        responseType: "arraybuffer"
+      });
+      return response;
+    } catch (error) {
+      console.error('Ошибка генерации PDF:', error);
+      throw error;
+    }
   }
 
   async releaseProducts(payload) {
@@ -85,6 +98,20 @@ class ProductService {
       return response.data;
     } catch (error) {
       console.error("Ошибка выпуска товаров:", error);
+      throw error;
+    }
+  }
+
+  async batchProducts(data) {
+    const api = this.getApiUrl();
+
+    try {
+      const response = await axios.post(`${api}/products/batch`, data, {
+        headers: authHeader()
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Ошибка пакетной обработки товаров:", error);
       throw error;
     }
   }

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: 'auth'
+})
   import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
   import ProductService from '@/services/ProductServices.js'
   import type { DvhListItem } from '~/types/products'
@@ -7,6 +10,13 @@
   import('vue-pdf-embed')
 )
   
+const dvhHeaders = [
+  { title: 'Номер ДВХ', value: 'dvh_number' },
+  { title: 'Дата вьезда', value: 'arrival_date' },
+  { title: 'Дата выезда', value: 'departure_date' },
+  { title: 'Оператор', value: 'operator_who_registered' },
+  { title: 'Владелец', value: 'product_owner' },
+]
   // ===== Utils =====
   function formatDate(date: Date) {
     const year = date.getFullYear()
@@ -41,8 +51,8 @@
       const data: any = await ProductService.getReleasedDvhList({
         pageNumber: pagination.value.currentPage,
         pageSize: pagination.value.pageSize,
-        startDate: startDate.value,
-        endDate: endDate.value
+        startDate: startDate.value  + "T00:00:00Z",
+        endDate: endDate.value  + "T23:59:59Z"
       })
       dvhList.value = data.data
       pagination.value.totalItems = data.pagination.totalItems
@@ -137,6 +147,18 @@ const sendProductsToServer = async () => {
     alert('Ошибка отправки товаров на сервер')
   }
 }
+
+function formatDateTime(dateStr: string | null) {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
   onMounted(loadDvhList)
   
   onBeforeUnmount(() => {
@@ -147,7 +169,7 @@ const sendProductsToServer = async () => {
   <template>
     <v-container fluid>
       <v-card>
-        <v-card-title>Список DVH</v-card-title>
+        <v-card-title>Список Выпущенных Товаров</v-card-title>
   
         <!-- Filters -->
         <v-card-text>
@@ -170,6 +192,7 @@ const sendProductsToServer = async () => {
     :loading="loading"
     :items-per-page="pagination.pageSize"
     :server-items-length="pagination.totalItems"
+    :headers="dvhHeaders"
   >
     <!-- Колонка dvh_number как ссылка -->
     <template v-slot:item.dvh_number="{ item }">
@@ -177,6 +200,16 @@ const sendProductsToServer = async () => {
         {{ item.dvh_number }}
       </NuxtLink>
     </template>
+
+      <!-- Форматируем дату въезда -->
+  <template v-slot:item.arrival_date="{ item }">
+    {{ formatDateTime(item.arrival_date) }}
+  </template>
+
+  <!-- Форматируем дату выезда -->
+  <template v-slot:item.departure_date="{ item }">
+    {{ formatDateTime(item.departure_date) }}
+  </template>
   </v-data-table>
         <!-- ===== PDF DIALOG ===== -->
         <v-dialog v-model="isDialogOpen" fullscreen>

@@ -1,12 +1,21 @@
 <script setup lang="ts">
+  definePageMeta({
+  middleware: 'auth'
+})
   import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
   import ProductService from '@/services/ProductServices.js'
   import type { DvhListItem } from '~/types/products'
+import Cookies from 'js-cookie';
 
   const VuePdfEmbed = defineAsyncComponent(() =>
   import('vue-pdf-embed')
 )
-  
+const dvhHeaders = [
+  { title: 'Номер ДВХ', value: 'dvh_number' },
+  { title: 'Дата создания', value: 'arrival_date' },
+  { title: 'Оператор', value: 'operator_who_registered' },
+  { title: 'Владелец', value: 'product_owner' },
+]
   // ===== Utils =====
   function formatDate(date: Date) {
     const year = date.getFullYear()
@@ -26,6 +35,9 @@
   
   // ===== MODAL =====
   const isDialogOpen = ref(false)
+  const snackbar = ref(false)
+const snackbarMessage = ref('')
+const snackbarColor = ref<'success' | 'error'>('success')
   
   // ===== PDF STATE =====
   const pdfUrl = ref<string | null>(null)
@@ -75,6 +87,7 @@
         body: formData
       })
       const data = await res.json()
+      console.log('PRODUCTS:  ', data);
   
       tableData.value = data?.result?.products || []
       headerData.value = data?.result?.header || {}
@@ -93,62 +106,82 @@
   )
 const sendProductsToServer = async () => {
   if (!tableData.value.length) {
-    alert('Нет данных для отправки')
+    snackbarMessage.value = 'Нет данных для отправки'
+    snackbarColor.value = 'error'
+    snackbar.value = true
     return
   }
 
-  try {
-    // Преобразуем каждый объект PDF в формат API
-    const payload = tableData.value.map(item => ({
-      name: item.name,
-      tnved_code: item.hsCode,
-      weight: Number(item.weight) || 0,
-      quantity: Number(item.qty) || 0,
-      price: Number(item.price) || 0,
-      currency: item.currency || 'USD',
-      dvh_number: item.dvh_number, // можно динамически взять, если есть
-      product_owner: headerData.value.receiver, // можно динамически
-      released: false,
-      operator_who_registered: 'Operator1',
-      operator_who_released: null,
-      deleted: false,
-      declaration_number: 'DEC123',
-      transit_declaration_number: 'TRANSIT123',
-      arrival_date: new Date().toISOString(),
-      departure_date: null,
-      count_of_days_in_storage: 0,
-      price_for_storage: 0,
-      warehouseId: 1
-    }))
+  const operator_who_registered = Cookies.get('user_name');
 
-    const response = await fetch('http://localhost:5000/products/batch', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    })
+try {
+  const payload = tableData.value.map(item => ({
+    name: item.name,
+    tnved_code: item.hsCode,
+    weight: Number(item.weight) || 0,
+    quantity: Number(item.qty) || 0,
+    price: Number(item.price) || 0,
+    currency: item.currency || 'USD',
+    dvh_number: item.dvh_number,
+    product_owner: headerData.value.receiver,
+    released: false,
+    operator_who_registered: operator_who_registered,
+    operator_who_released: null,
+    deleted: false,
+    declaration_number: 'DEC123',
+    transit_declaration_number: 'TRANSIT123',
+    arrival_date: new Date().toISOString(),
+    departure_date: null,
+    count_of_days_in_storage: 0,
+    price_for_storage: 0,
+    warehouseId: 1
+  }))
 
-    if (!response.ok) throw new Error(`Ошибка ${response.status}`)
-    const data = await response.json()
-    console.log('Сервер вернул:', data)
-    alert('Товары успешно отправлены!')
-  } catch (err) {
-    console.error('Ошибка отправки на сервер:', err)
-    alert('Ошибка отправки товаров на сервер')
-  }
+  const response = await ProductService.batchProducts(payload)
+  // Если ProductService использует Axios, здесь всё уже в response.data
+  console.log('Ответ сервера:', response.data)
+
+  isDialogOpen.value = false
+  snackbarMessage.value = 'Товары успешно отправлены!'
+  snackbarColor.value = 'success'
+  snackbar.value = true
+} catch (err) {
+  console.error('Ошибка отправки на сервер:', err)
+  isDialogOpen.value = false
+  snackbarMessage.value = 'Ошибка отправки товаров на сервер'
+  snackbarColor.value = 'error'
+  snackbar.value = true
 }
-  onMounted(loadDvhList)
-  
-  onBeforeUnmount(() => {
-    if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value)
-  })
+
+}
+
+function formatDateTime(dateStr: string | null) {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+
+onMounted(loadDvhList)
+
+onBeforeUnmount(() => {
+  if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value)
+})
   </script>
   
   <template>
     <v-container fluid>
+      <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000" top right>
+  {{ snackbarMessage }}
+</v-snackbar>
       <v-card>
-        <v-card-title>Список DVH</v-card-title>
+        <v-card-title>Список зарегистрированных товаров</v-card-title>
   
         <!-- Filters -->
         <v-card-text>
@@ -171,19 +204,26 @@ const sendProductsToServer = async () => {
         </v-card-text>
   
         <!-- Table -->
-        <v-data-table
-    :items="dvhList"
-    :loading="loading"
-    :items-per-page="pagination.pageSize"
-    :server-items-length="pagination.totalItems"
-  >
-    <!-- Колонка dvh_number как ссылка -->
-    <template v-slot:item.dvh_number="{ item }">
-      <NuxtLink :to="`/products/${item.dvh_number}`">
-        {{ item.dvh_number }}
-      </NuxtLink>
-    </template>
-  </v-data-table>
+<v-data-table
+  :items="dvhList"
+  :loading="loading"
+  :items-per-page="pagination.pageSize"
+  :server-items-length="pagination.totalItems"
+  :headers="dvhHeaders"
+>
+  <!-- DVH как ссылка -->
+  <template v-slot:item.dvh_number="{ item }">
+    <NuxtLink :to="`/products/${item.dvh_number}`">
+      {{ item.dvh_number }}
+    </NuxtLink>
+  </template>
+
+  <!-- Форматируем arrival_date -->
+  <template v-slot:item.arrival_date="{ item }">
+    {{ formatDateTime(item.arrival_date) }}
+  </template>
+</v-data-table>
+
         <!-- ===== PDF DIALOG ===== -->
         <v-dialog v-model="isDialogOpen" fullscreen>
           <v-card>
@@ -208,13 +248,26 @@ const sendProductsToServer = async () => {
                     <VuePdfEmbed v-if="pdfUrl" :source="pdfUrl" />
 
                   </ClientOnly>
-                  <v-alert v-if="isPdfLoading" type="info">Обработка PDF…</v-alert>
-                  <v-alert v-if="pdfError" type="error">{{ pdfError }}</v-alert>
+                  <!-- Спиннер при обработке -->
+ 
+
+
   
                 </v-col>
   
                 <!-- Result -->
                 <v-col cols="6" class="pa-4">
+                   <div v-if="isPdfLoading" class="d-flex align-center">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      size="36"
+      class="mr-2"
+    ></v-progress-circular>
+      <v-alert v-if="pdfError" type="error">{{ pdfError }}</v-alert>
+
+    <span>Обработка PDF…</span>
+  </div>
                   <h3>Результат</h3>
   
                   <v-alert

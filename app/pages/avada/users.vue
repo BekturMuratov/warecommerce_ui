@@ -2,6 +2,10 @@
 import { ref, onMounted } from 'vue'
 import AuthService from '~/services/AuthService'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const users = ref([])
 
 async function loadUsers() {

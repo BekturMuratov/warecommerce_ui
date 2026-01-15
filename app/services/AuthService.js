@@ -23,6 +23,7 @@ class AuthService {
       Cookies.set("user_id", data.user_id, { expires: 7 });
       Cookies.set("user_name", data.user_name, { expires: 7 });
       Cookies.set("role", data.role, { expires: 7 });
+      Cookies.set("warehouse_id", data.warehouse_id, { expires: 7 });
     }
 
     return data;

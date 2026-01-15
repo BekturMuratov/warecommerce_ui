@@ -52,8 +52,13 @@
              <td>{{ item.price_for_storage }}</td>
              <td>{{ item.count_of_days_in_storage }}</td>
            </tr>
+
          </template>
        </v-data-table>
+                  <div class="mt-4 d-flex justify-end">
+  <strong>Итого за хранение: </strong>
+  <span class="ml-2">{{ totalStoragePrice }} сом</span>
+</div>
      </v-card-text>
       <!-- МОДАЛКА PDF -->
     <v-dialog v-model="pdfDialog" width="80%">
@@ -80,7 +85,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+definePageMeta({
+  middleware: 'auth'
+})
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductService from '@/services/ProductServices.js'
 import type { Product } from '~/types/products'
@@ -112,7 +120,7 @@ async function generatePDF() {
   try {
     const dvh_number = route.params.dvh_number as string
 
-    const response = await ProductService.generatePdf(dvh_number)
+    const response = await ProductService.generateReleasedPdf(dvh_number)
 
     console.log("PDF byteLength:", response.data.byteLength)
 
@@ -128,6 +136,10 @@ async function generatePDF() {
     console.error("Ошибка генерации PDF:", err)
   }
 }
+/* Общее количество суммы за хранение */
+const totalStoragePrice = computed(() => {
+  return products.value.reduce((sum, item) => sum + Number(item.price_for_storage || 0), 0)
+})
 
 
 onMounted(loadProducts)

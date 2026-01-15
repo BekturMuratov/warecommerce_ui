@@ -168,12 +168,16 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  middleware: 'auth'
+})
   import { ref, onMounted, computed } from 'vue'
   import { useRoute } from 'vue-router'
   import ProductService from '../../services/ProductServices.js'
   import TariffsService from '../../services/TariffService.js'
   import type { Product } from '~/types/products'
   import type { Tariff } from '~/types/tariff'
+  import Cookies from "js-cookie";
   
   const route = useRoute()
   const products = ref<Product[]>([])
@@ -211,7 +215,8 @@
   const tariffs = ref<Tariff[]>([])
   async function loadTariffs() {
     try {
-      tariffs.value = await TariffsService.getAll(1)
+      const warehouse_id = Cookies.get("warehouse_id");
+      tariffs.value = await TariffsService.getAll(warehouse_id)
     } catch (err) {
       console.error('Ошибка загрузки тарифов:', err)
     }
