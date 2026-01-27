@@ -59,8 +59,13 @@ const drawer = ref(true)
 const router = useRouter()
 
 const menu = [
- { title: 'Товары', link: '/products' },
+  { title: 'Дашборд', link: '/' },
+ { title: 'Владельцы', link: '/owners' },
+ { title: 'Регистрация АТС', link: '/cars' },
+ { title: 'Регистрация товаров', link: '/products' },
+ { title: 'Выпущенные АТС', link: '/released_cars' },
  { title: 'Выпущенные товары', link: '/released_products' },
+ { title: 'Отчеты', link: '/reports' },
  // Добавь сюда другие страницы
 ]
 

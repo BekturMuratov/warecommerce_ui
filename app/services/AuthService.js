@@ -22,6 +22,7 @@ class AuthService {
       Cookies.set("refresh_token", data.refresh_token, { expires: 7 });
       Cookies.set("user_id", data.user_id, { expires: 7 });
       Cookies.set("user_name", data.user_name, { expires: 7 });
+      localStorage.setItem("user_name", data.user_name);
       Cookies.set("role", data.role, { expires: 7 });
       Cookies.set("warehouse_id", data.warehouse_id, { expires: 7 });
     }
