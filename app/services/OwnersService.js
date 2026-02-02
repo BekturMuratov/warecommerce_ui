@@ -15,6 +15,10 @@ class ProductService {
   createOwner(data) {
     return axios.post(`${this.getApiUrl()}/owners`, data, { headers: authHeader() });
   }
+
+  findOwnerByInn(data) {
+    return axios.get(`${this.getApiUrl()}/owners/find-by-inn/${data}`, { headers: authHeader() });  
+  }
 }
 
 export default new ProductService();

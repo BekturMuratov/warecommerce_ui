@@ -143,6 +143,8 @@ definePageMeta({ middleware: 'auth' })
 import { ref, onMounted, watch, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import ProductService from '@/services/ProductServices'
 import Cookies from 'js-cookie'
+import PDFService from '~/services/PDFService'
+import OwnersService from '~/services/OwnersService'
 
 const VuePdfEmbed = defineAsyncComponent(() => import('vue-pdf-embed'))
 
@@ -208,32 +210,32 @@ async function handleFileUpload(event: Event) {
   const formData = new FormData()
   formData.append('file', file)
 
-  const res = await fetch('http://localhost:4200/upload', {
-    method: 'POST',
-    body: formData
-  })
+  const res = await PDFService.uploadPdf(formData);
 
-  const data = await res.json()
-  tableData.value = data?.result?.products || []
+  tableData.value = res?.result?.products || []
 
   if (!Object.keys(headerData.value).length) {
-    headerData.value = data?.result?.header || {}
+    headerData.value = res?.result?.header || {}
   }
 
   isPdfLoading.value = false
 }
 
 async function findOwnerByInn() {
-  ownerLoading.value = true
+  ownerLoading.value = true;
+
   try {
-    const res = await fetch(
-      `http://localhost:5000/owners/find-by-inn?inn=${ownerInn.value}`
-    )
-    const data = await res.json()
-    ownerData.value = data[0]
-    productOwnerId.value = data[0].id
+    const response = await OwnersService.findOwnerByInn(ownerInn.value);
+    const owner = response.data?.[0];
+
+    if (!owner) return;
+
+    ownerData.value = owner;
+    productOwnerId.value = owner.id;
+  } catch (error) {
+    console.error("Ошибка поиска владельца по ИНН:", error);
   } finally {
-    ownerLoading.value = false
+    ownerLoading.value = false;
   }
 }
 

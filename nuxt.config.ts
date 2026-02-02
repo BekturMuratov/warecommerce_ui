@@ -15,7 +15,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      API_URL: process.env.NUXT_PUBLIC_API_URL
+      API_URL: process.env.NUXT_PUBLIC_API_URL,
+      PDF_URL: process.env.PDF_GENERATION_URL
     }
   }
 })
