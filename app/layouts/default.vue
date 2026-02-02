@@ -65,7 +65,8 @@ const menu = [
  { title: 'Регистрация товаров', link: '/products' },
  { title: 'Выпущенные АТС', link: '/released_cars' },
  { title: 'Выпущенные товары', link: '/released_products' },
- { title: 'Отчеты', link: '/reports' },
+ { title: 'Отчет помещенных АТС', link: '/report_stock_cars' },
+ { title: 'Отчет выпущенных АТС', link: '/report_released_cars' },
  // Добавь сюда другие страницы
 ]
 

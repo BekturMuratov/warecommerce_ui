@@ -27,7 +27,7 @@ const dvhHeaders = [
   
   // ===== DVH LIST STATE =====
   const today = formatDate(new Date())
-  const dvhList = ref<DvhListItem[]>([])
+  const dvhList = ref<any[]>([])
   const pagination = ref({ currentPage: 1, pageSize: 10, totalItems: 0 })
   const loading = ref(false)
   

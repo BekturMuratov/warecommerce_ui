@@ -19,6 +19,16 @@ export interface Product {
  count_of_days_in_storage?: number | null;
  price_for_storage?: number | null;
  warehouseId?: number | null;
+ warehouse: Warehouse;
+}
+
+export interface Warehouse {
+    id: number;
+    name: string;
+    address: string;
+    guid: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface PaginatedResponse<T> {

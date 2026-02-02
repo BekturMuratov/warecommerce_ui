@@ -27,13 +27,13 @@
         </v-card-text>
   
         <!-- Table -->
-<v-data-table
-  :items="dvhList"
-  :loading="loading"
-  :items-per-page="pagination.pageSize"
-  :server-items-length="pagination.totalItems"
-  :headers="dvhHeaders"
->
+          <v-data-table
+              :items="dvhList"
+              :loading="loading"
+              :items-per-page="pagination.pageSize"
+              :server-items-length="pagination.totalItems"
+              :headers="dvhHeaders"
+                 >
   <!-- DVH как ссылка -->
   <template v-slot:item.dvh_number="{ item }">
     <NuxtLink :to="`/cars/${item.dvh_number}`">
@@ -46,6 +46,7 @@
     {{ formatDateTime(item.arrival_date) }}
   </template>
 </v-data-table>
+
 
         <!-- ===== PDF DIALOG ===== -->
         <v-dialog v-model="isDialogOpen" fullscreen>
