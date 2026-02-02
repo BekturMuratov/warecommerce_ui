@@ -177,6 +177,7 @@ import ProductService from '@/services/ProductServices.js'
 import type { DvhListItem } from '~/types/products'
 import Cookies from 'js-cookie';
 import CarsService from '~/services/CarsService';
+import PDFService from '~/services/PDFService';
 
   const VuePdfEmbed = defineAsyncComponent(() =>
   import('vue-pdf-embed')
@@ -246,37 +247,26 @@ const vin_code = ref('')
   }
   
   // ===== PDF HANDLERS =====
-  const handleFileUpload = async (event: Event) => {
-    const file = (event.target as HTMLInputElement).files?.[0]
-    if (!file || file.type !== 'application/pdf') {
-      pdfError.value = 'Загрузите PDF файл'
-      return
-    }
-  
-    pdfUrl.value = URL.createObjectURL(file)
-    const formData = new FormData()
-    formData.append('file', file)
-  
-    isPdfLoading.value = true
-    pdfError.value = null
-  
-    try {
-      const res = await fetch('http://localhost:4200/upload', {
-        method: 'POST',
-        body: formData
-      })
-      const data = await res.json()
-      console.log('PRODUCTS:  ', data);
-  
-      tableData.value = data?.result?.products || []
-      headerData.value = data?.result?.header || {}
-      console.log('headerdata: ', headerData.value)
-    } catch {
-      pdfError.value = 'Ошибка обработки PDF'
-    } finally {
-      isPdfLoading.value = false
-    }
+async function handleFileUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  pdfUrl.value = URL.createObjectURL(file)
+  isPdfLoading.value = true
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await PDFService.uploadPdf(formData);
+
+  tableData.value = res?.result?.products || []
+
+  if (!Object.keys(headerData.value).length) {
+    headerData.value = res?.result?.header || {}
   }
+
+  isPdfLoading.value = false
+}
   
   // ===== EFFECTS =====
   watch(

@@ -143,7 +143,7 @@ definePageMeta({ middleware: 'auth' })
 import { ref, onMounted, watch, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import ProductService from '@/services/ProductServices'
 import Cookies from 'js-cookie'
-import PDFService from '~/services/PDFService'
+import PDFService from '~/services/PDFService.ts'
 import OwnersService from '~/services/OwnersService'
 
 const VuePdfEmbed = defineAsyncComponent(() => import('vue-pdf-embed'))
@@ -201,24 +201,25 @@ async function loadDvhList() {
 }
 
 async function handleFileUpload(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
 
-  pdfUrl.value = URL.createObjectURL(file)
-  isPdfLoading.value = true
+  pdfUrl.value = URL.createObjectURL(file);
+  isPdfLoading.value = true;
 
-  const formData = new FormData()
-  formData.append('file', file)
+  try {
+    const res = await PDFService.uploadPdf(file);
 
-  const res = await PDFService.uploadPdf(formData);
+    tableData.value = res?.result?.products || [];
 
-  tableData.value = res?.result?.products || []
-
-  if (!Object.keys(headerData.value).length) {
-    headerData.value = res?.result?.header || {}
+    if (!Object.keys(headerData.value).length) {
+      headerData.value = res?.result?.header || {};
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isPdfLoading.value = false;
   }
-
-  isPdfLoading.value = false
 }
 
 async function findOwnerByInn() {

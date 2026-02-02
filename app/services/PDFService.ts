@@ -4,25 +4,26 @@ import authHeader from "./AuthHeader";
 class PDFService {
   getApiUrl() {
     const config = useRuntimeConfig();
-    return config.public.PDF_URL
+    return config.public.PDF_URL;
   }
 
-  /**
-   * Загрузка и обработка PDF
-   */
-  async uploadPdf(file) {
+  async uploadPdf(file: File) {
     const api = this.getApiUrl();
 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await axios.post(`${api}/upload`, formData, {
-        headers: {
-          ...authHeader(),
-          // ВАЖНО: axios сам выставит multipart boundary
+      const response = await axios.post(
+        `${api}/upload`,
+        formData,
+        {
+          headers: {
+            ...authHeader()
+            // Content-Type НЕ УКАЗЫВАЕМ
+          }
         }
-      });
+      );
 
       return response.data;
     } catch (error) {

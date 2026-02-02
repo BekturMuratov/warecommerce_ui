@@ -17,7 +17,7 @@ class ProductService {
   }
 
   findOwnerByInn(data) {
-    return axios.get(`${this.getApiUrl()}/owners/find-by-inn/${data}`, { headers: authHeader() });  
+    return axios.get(`${this.getApiUrl()}/owners/find-by-inn?inn=${data}`, { headers: authHeader() });  
   }
 }
 
