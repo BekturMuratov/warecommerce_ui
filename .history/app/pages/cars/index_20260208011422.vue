@@ -251,28 +251,19 @@ const vin_code = ref('')
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file) return;
 
-  // 🔹 освобождаем старый PDF URL
-  if (pdfUrl.value) {
-    URL.revokeObjectURL(pdfUrl.value);
-  }
-
   pdfUrl.value = URL.createObjectURL(file);
   isPdfLoading.value = true;
 
   try {
     const res = await PDFService.uploadCarPdf(file);
 
-    if (res?.status !== 'ok') {
-      throw new Error(res?.message || 'Ошибка обработки PDF');
+    tableData.value = res?.result?.products || [];
+
+    if (!Object.keys(headerData.value).length) {
+      headerData.value = res?.result?.header || {};
     }
-
-    tableData.value = Array.isArray(res.result?.products)
-      ? res.result.products
-      : [];
-
-    headerData.value = res.result?.header || {};
   } catch (error) {
-    console.error('Ошибка загрузки PDF:', error);
+    console.error(error);
   } finally {
     isPdfLoading.value = false;
   }

@@ -15,32 +15,7 @@ class PDFService {
 
     try {
       const response = await axios.post(
-        `${api}/api/parse/dvh`,
-        formData,
-        {
-          headers: {
-            ...authHeader()
-            // Content-Type НЕ УКАЗЫВАЕМ
-          }
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Ошибка загрузки PDF:", error);
-      throw error;
-    }
-  }
-
-  async uploadCarPdf(file: File) {
-    const api = this.getApiUrl();
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await axios.post(
-        `${api}/api/parse/dvh`,
+        `${api}/upload`,
         formData,
         {
           headers: {

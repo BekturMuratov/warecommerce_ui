@@ -15,7 +15,7 @@ class PDFService {
 
     try {
       const response = await axios.post(
-        `${api}/api/parse/dvh`,
+        `${api}/api/`,
         formData,
         {
           headers: {
@@ -40,7 +40,7 @@ class PDFService {
 
     try {
       const response = await axios.post(
-        `${api}/api/parse/dvh`,
+        `${api}/upload/auto`,
         formData,
         {
           headers: {
