@@ -351,7 +351,7 @@ const findOwnerByInn = async () => {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/owners/find-by-inn?inn=${ownerInn.value}`
+      `http://46.8.24.33/api/owners/find-by-inn?inn=${ownerInn.value}`
     )
 
     if (!res.ok) throw new Error()

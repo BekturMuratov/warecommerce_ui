@@ -15,7 +15,7 @@ class PDFService {
 
     try {
       const response = await axios.post(
-        `${api}/upload`,
+        `${api}/parse/dvh`,
         formData,
         {
           headers: {
