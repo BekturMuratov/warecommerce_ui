@@ -40,7 +40,7 @@ class PDFService {
 
     try {
       const response = await axios.post(
-        `${api}/upload-auto`,
+        `${api}/upload`,
         formData,
         {
           headers: {

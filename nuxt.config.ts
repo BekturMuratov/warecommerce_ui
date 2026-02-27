@@ -24,11 +24,6 @@ export default defineNuxtConfig({
       changeOrigin: true,
       pathRewrite: { '^/api/': '/api/' }
     },
-      '/script': {
-        target: 'http://127.0.0.1:9200',
-        changeOrigin: true,
-        rewrite: (path: string) => path.replace(/^\/script/, ''),
-      }
   },
   }
 })

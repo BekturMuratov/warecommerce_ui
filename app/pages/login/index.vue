@@ -22,7 +22,7 @@ async function login() {
 
   try {
     await auth.login(form)
-    await navigateTo('/products')
+    await navigateTo('/cars')
   } catch (e) {
     errorMessage.value = 'Неверный email или пароль'
   } finally {
