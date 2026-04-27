@@ -103,6 +103,7 @@ onMounted(loadStocks)
 </script>
 
 <template>
+  <NuxtLayout name="default">
   <v-container fluid>
 
     <v-snackbar
@@ -238,6 +239,7 @@ onMounted(loadStocks)
 
     </v-card>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <style scoped>

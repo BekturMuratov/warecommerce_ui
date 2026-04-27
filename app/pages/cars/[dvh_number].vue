@@ -1,4 +1,5 @@
 <template>
+      <NuxtLayout name="default">
   <v-container fluid>
     <v-card>
       <v-card-title>
@@ -104,12 +105,10 @@
                 >
                   <v-card-text>
 
-                    <v-checkbox
-                      v-model="selectedProducts"
-                      :value="product.id"
-                      density="compact"
-                      hide-details
-                    />
+                   <input
+                      type="checkbox"
+                     :value="product.id"
+                     v-model="selectedProducts"/>
 
                     <div class="mobile-row">
                       <span class="label">ID</span>
@@ -268,6 +267,7 @@
       </v-card>
     </v-dialog>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <script setup>
@@ -360,12 +360,12 @@ onMounted(loadProducts)
   color: rgba(0, 0, 0, 0.6);
 }
 
-.v-checkbox-native {
+/* .v-checkbox-native {
   appearance: none;
   width: 18px;
   height: 18px;
   border: 2px solid #9e9e9e;
   border-radius: 4px;
   cursor: pointer;
-}
+} */
 </style>

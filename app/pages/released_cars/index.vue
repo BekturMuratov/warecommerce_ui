@@ -21,7 +21,7 @@ const dvhHeaders = [
   { title: 'Дата въезда', value: 'arrival_date' },
   { title: 'Дата выезда', value: 'departure_date' },
   { title: 'Оператор', value: 'operator_who_registered' },
-  { title: 'Владелец', value: 'product_owner' },
+  { title: 'Владелец', value: 'car_owner.name' },
 ]
 
 /* ================= UTILS ================= */
@@ -35,8 +35,18 @@ function formatDate(date: Date) {
 
 function formatDateTime(dateStr: string | null) {
   if (!dateStr) return '-'
+
   const date = new Date(dateStr)
-  return date.toISOString().replace('T', ' ').split('.')[0]
+
+  return date.toLocaleString('ru-RU', {
+    timeZone: 'Asia/Almaty',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 }
 
 /* ================= STATE ================= */
@@ -161,6 +171,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <NuxtLayout name="default">
   <v-container fluid>
     <v-card>
       <v-card-title>
@@ -247,7 +258,7 @@ onBeforeUnmount(() => {
               <span>{{ item.operator_who_registered }}</span>
 
               <span class="label">Владелец</span>
-              <span>{{ item.product_owner }}</span>
+              <span>{{ item.car_owner?.name }}</span>
 
             </div>
           </v-card-text>
@@ -359,6 +370,7 @@ onBeforeUnmount(() => {
       </v-dialog>
     </v-card>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <style scoped>

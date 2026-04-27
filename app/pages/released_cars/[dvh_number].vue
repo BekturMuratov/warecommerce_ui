@@ -60,6 +60,7 @@ onMounted(loadProducts)
 </script>
 
 <template>
+<NuxtLayout name="default">
   <v-container fluid>
     <v-card>
       <v-card-title>
@@ -204,6 +205,7 @@ onMounted(loadProducts)
 
     </v-card>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <style scoped>

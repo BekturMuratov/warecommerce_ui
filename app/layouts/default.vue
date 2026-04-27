@@ -1,109 +1,76 @@
 <template>
   <v-app>
-    <!-- ================= APP BAR ================= -->
-    <v-app-bar app color="primary" dark>
-      <!-- Бургер только на мобильных -->
+
+    <!-- SIDEBAR -->
+    <v-navigation-drawer
+      v-model="drawer"
+      :permanent="!mobile"
+      :temporary="mobile"
+      width="260"
+      class="app-sidebar"
+    >
+      <sidebar @close="drawer = false" />
+    </v-navigation-drawer>
+
+    <!-- HEADER -->
+    <v-app-bar
+      flat
+      height="60"
+      class="app-header"
+    >
       <v-app-bar-nav-icon
-        v-if="!mdAndUp"
+        v-if="mobile"
         @click="drawer = !drawer"
       />
 
-      <v-app-bar-title>АИС Склад</v-app-bar-title>
+      <v-spacer />
 
-      <v-spacer></v-spacer>
-
-      <v-btn icon @click="handleLogout">
-           <v-icon icon="fas fa-sign-out-alt" />
-      </v-btn>
+      <slot name="header" />
     </v-app-bar>
 
-    <!-- ================= DRAWER ================= -->
-    <v-navigation-drawer
-      v-model="drawer"
-      :permanent="mdAndUp"
-      :temporary="!mdAndUp"
-      app
-    >
-      <v-list nav>
+    <!-- MAIN -->
+    <v-main class="app-main">
+      <v-container fluid class="main-container">
 
-        <!-- Пункты меню -->
-        <v-list-item
-          v-for="item in menu"
-          :key="item.title"
-          :to="item.link"
-          link
-          @click="!mdAndUp && (drawer = false)"
-        >
-          <v-list-item-title>
-            {{ item.title }}
-          </v-list-item-title>
-        </v-list-item>
-
-        <v-divider class="my-2" />
-
-        <!-- Выход -->
-        <v-list-item
-          @click="handleLogout"
-          link
-        >
-          <v-icon start color="error">
-            mdi-logout
-          </v-icon>
-
-          <v-list-item-title class="text-error">
-            Выход
-          </v-list-item-title>
-        </v-list-item>
-
-      </v-list>
-    </v-navigation-drawer>
-
-    <!-- ================= MAIN ================= -->
-    <v-main>
-      <v-container fluid>
         <slot />
+
       </v-container>
     </v-main>
+
   </v-app>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+
+import { ref } from 'vue'
 import { useDisplay } from 'vuetify'
-import { useAuthStore } from '@/stores/auth'
+import Sidebar from '~/components/Layout/Sidebar.vue'
 
-/* ================= DISPLAY ================= */
-const { mdAndUp } = useDisplay()
+const drawer = ref(true)
 
-/* ================= DRAWER ================= */
-const drawer = ref(false)
+const { mobile } = useDisplay()
 
-/* 
-   Если экран md и выше → drawer всегда открыт
-   Если меньше md → закрыт
-*/
-watch(
-  mdAndUp,
-  (val) => {
-    drawer.value = val
-  },
-  { immediate: true }
-)
-
-/* ================= MENU ================= */
-const menu = [
-  { title: 'Дашборд', link: '/' },
-  { title: 'Владельцы', link: '/owners' },
-  { title: 'Регистрация АТС', link: '/cars' },
-  { title: 'Выпущенные АТС', link: '/released_cars' },
-  { title: 'Отчет помещенных АТС', link: '/report_stock_cars' },
-  { title: 'Отчет выпущенных АТС', link: '/report_released_cars' },
-]
-
-/* ================= AUTH ================= */
-const authStore = useAuthStore()
-
-function handleLogout() {
-  authStore.logout()
-}
 </script>
+
+<style scoped>
+
+.app-sidebar{
+  background:#0f1e33;
+  color:white;
+}
+
+.app-main{
+  background:#f4f6f8;
+  min-height:100vh;
+}
+
+.app-header{
+  background:white;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.main-container{
+  margin:auto;
+}
+
+</style>

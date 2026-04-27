@@ -74,21 +74,19 @@ async function loadStocks() {
 
 async function downloadExcel() {
   try {
-    const buffer = await CarsService.exportAllReleasedStock({
-      date_from: filters.value.date_from + 'T00:00:00Z',
-      date_to: filters.value.date_to + 'T23:59:59Z',
+    const buffer = await CarsService.exportAllStock({
+      date_from: filters.value.date_from + "T00:00:00Z",
+      date_to: filters.value.date_to + "T23:59:59Z"
     })
 
     const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     })
 
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
-
     link.href = url
-    link.download = `Выпущенные_АТС_${filters.value.date_from}_по_${filters.value.date_to}.xlsx`
-
+    link.download = `Остатки_АТС_${filters.value.date_from}_по_${filters.value.date_to}.xlsx`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -105,6 +103,7 @@ onMounted(loadStocks)
 </script>
 
 <template>
+  <NuxtLayout name="default">
   <v-container fluid>
 
     <v-snackbar
@@ -240,6 +239,7 @@ onMounted(loadStocks)
 
     </v-card>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <style scoped>

@@ -6,6 +6,7 @@ definePageMeta({
 import { ref, onMounted, computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import OwnersService from '@/services/OwnersService'
+import PageHeader from '~/components/Layout/PageHeader.vue'
 
 const { smAndDown } = useDisplay()
 
@@ -77,26 +78,36 @@ onMounted(fetchOwners)
 </script>
 
 <template>
+  <NuxtLayout name="default">
+
+  <PageHeader
+  breadcrumb="РЕЕСТР КОНТРАГЕНТОВ / ВЛАДЕЛЬЦЫ"
+  userName="Иванов И.И."
+  userRole="Дежурный инспектор"
+  avatar="/avatar.png"
+/>
+
   <v-container fluid>
+      <!-- ================= HEADER ================= -->
+
+        <v-card-title
+  class="d-flex flex-column flex-sm-row justify-space-between align-sm-center ga-3"
+>
+  <span class="text-h6 font-weight">
+    Список зарегистрированных владельцев
+  </span>
+
+  <v-btn
+    color="primary"
+    class="w-100 w-sm-auto"
+    @click="dialog = true"
+  >
+   + Регистрация нового лица
+  </v-btn>
+</v-card-title>
     <v-card elevation="2">
 
-      <!-- ================= HEADER ================= -->
-      <v-card-title
-        class="d-flex flex-column flex-md-row justify-space-between align-md-center"
-      >
-        <span class="mb-2 mb-md-0">
-          Список зарегистрированных владельцев
-        </span>
 
-        <v-btn
-          color="primary"
-          block
-          class="w-100 w-md-auto"
-          @click="dialog = true"
-        >
-          Добавить владельца
-        </v-btn>
-      </v-card-title>
 
       <!-- ================= SEARCH ================= -->
       <v-card-text>
@@ -105,6 +116,7 @@ onMounted(fetchOwners)
           label="Поиск по имени и ИНН владельца"
           prepend-inner-icon="mdi-magnify"
           density="compact"
+          max-length="14"
           clearable
         />
       </v-card-text>
@@ -226,6 +238,7 @@ onMounted(fetchOwners)
     </v-dialog>
 
   </v-container>
+  </NuxtLayout>
 </template>
 
 <style scoped>

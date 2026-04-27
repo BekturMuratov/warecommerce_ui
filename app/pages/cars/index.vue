@@ -1,4 +1,6 @@
 <template>
+    <NuxtLayout name="default">
+
   <v-container fluid class="pa-2 pa-md-4">
     <!-- SNACKBAR -->
     <v-snackbar
@@ -92,121 +94,194 @@
               <span>{{ item.operator_who_registered }}</span>
 
               <span class="label">Владелец</span>
-              <span>{{ item.product_owner }}</span>
+              <span>{{ item.car_owner.name }}</span>
             </div>
           </v-card-text>
         </v-card>
       </div>
 
       <!-- PDF DIALOG -->
-      <v-dialog v-model="isDialogOpen" fullscreen>
-        <v-card>
-          <v-toolbar color="primary" dark>
-            <v-toolbar-title>Обработка PDF</v-toolbar-title>
-            <v-spacer />
-            <v-btn icon @click="isDialogOpen = false">✕</v-btn>
-          </v-toolbar>
+    <v-dialog v-model="isDialogOpen" fullscreen>
+  <v-card>
 
-          <v-card-text>
+    <v-toolbar color="primary" dark>
+      <v-toolbar-title>Обработка PDF</v-toolbar-title>
+      <v-spacer />
+      <v-btn icon @click="isDialogOpen = false">✕</v-btn>
+    </v-toolbar>
+
+    <v-card-text>
+      <v-row>
+
+        <!-- PDF -->
+        <v-col cols="12" md="6">
+
+          <v-file-input
+            accept=".pdf"
+            label="Загрузить PDF"
+            @change="handleFileUpload"
+          />
+
+          <ClientOnly>
+            <VuePdfEmbed
+              v-if="pdfUrl"
+              :source="pdfUrl"
+              class="pdf-viewer"
+            />
+          </ClientOnly>
+
+        </v-col>
+
+        <!-- RESULT -->
+        <v-col cols="12" md="6">
+
+          <v-progress-circular
+            v-if="isPdfLoading"
+            indeterminate
+            color="primary"
+            class="mb-3"
+          />
+
+          <v-alert v-if="pdfError" type="error">
+            {{ pdfError }}
+          </v-alert>
+
+          <!-- ================= OWNER SEARCH ================= -->
+
+          <v-card class="mb-4 pa-3" variant="outlined">
+
             <v-row>
-              <!-- PDF -->
-              <v-col cols="12" md="6">
-                <v-file-input
-                  accept=".pdf"
-                  label="Загрузить PDF"
-                  @change="handleFileUpload"
-                />
 
-                <ClientOnly>
-                  <VuePdfEmbed
-                    v-if="pdfUrl"
-                    :source="pdfUrl"
-                    class="pdf-viewer"
-                  />
-                </ClientOnly>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="ownerInn"
+                  label="ИНН владельца"
+                  placeholder="Введите ИНН (если пусто — используется дефолт)"
+                  clearable
+                />
               </v-col>
 
-              <!-- RESULT -->
-              <v-col cols="12" md="6">
-                <v-progress-circular
-                  v-if="isPdfLoading"
-                  indeterminate
-                  color="primary"
-                  class="mb-3"
-                />
-
-                <v-alert v-if="pdfError" type="error">
-                  {{ pdfError }}
-                </v-alert>
-
-                <h3 class="mb-3">Результат</h3>
-
-                <!-- MOBILE PRODUCTS -->
-                <div v-if="tableData.length && smAndDown">
-                  <v-card
-                    v-for="(item, i) in tableData"
-                    :key="i"
-                    class="mb-3"
-                    variant="outlined"
-                  >
-                    <v-card-text>
-                      <div class="mobile-row">
-                        <span class="label">Код ТНВЭД</span>
-                        <span>{{ item.hsCode }}</span>
-
-                        <span class="label">Наименование</span>
-                        <span>{{ item.name }}</span>
-
-                        <span class="label">Вес</span>
-                        <span>{{ item.weight }}</span>
-
-                        <span class="label">Кол-во</span>
-                        <span>{{ item.qty }}</span>
-
-                        <span class="label">Цена</span>
-                        <span>{{ item.price }}</span>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-                </div>
-
-                <!-- DESKTOP PRODUCTS -->
-                <v-table v-else-if="tableData.length">
-                  <thead>
-                    <tr>
-                      <th>Код ТНВЭД</th>
-                      <th>Наименование</th>
-                      <th>Вес</th>
-                      <th>Кол-во</th>
-                      <th>Цена</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(item, i) in tableData" :key="i">
-                      <td>{{ item.hsCode }}</td>
-                      <td>{{ item.name }}</td>
-                      <td>{{ item.weight }}</td>
-                      <td>{{ item.qty }}</td>
-                      <td>{{ item.price }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-
+              <v-col cols="12" md="3">
                 <v-btn
-                  color="primary"
-                  class="mt-4"
                   block
-                  @click="sendProductsToServer"
+                  color="primary"
+                  :loading="ownerLoading"
+                  @click="findOwnerByInn"
                 >
-                  Отправить на сервер
+                  Найти
                 </v-btn>
               </v-col>
+
             </v-row>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+
+            <v-alert
+              v-if="ownerError"
+              type="error"
+              class="mt-2"
+            >
+              {{ ownerError }}
+            </v-alert>
+
+            <v-alert
+              v-if="ownerData"
+              type="success"
+              class="mt-2"
+            >
+              Владелец: {{ ownerData.name }}
+            </v-alert>
+
+          </v-card>
+
+          <!-- ================= TABLE ================= -->
+
+          <h3 class="mb-3">Результат</h3>
+
+          <!-- MOBILE PRODUCTS -->
+
+          <div v-if="tableData.length && smAndDown">
+            <v-card
+              v-for="(item, i) in tableData"
+              :key="i"
+              class="mb-3"
+              variant="outlined"
+            >
+              <v-card-text>
+
+                <div class="mobile-row">
+
+                  <span class="label">Код ТНВЭД</span>
+                  <span>{{ item.hsCode }}</span>
+
+                  <span class="label">Наименование</span>
+                  <span>{{ item.name }}</span>
+
+                  <span class="label">Вес</span>
+                  <span>{{ item.weight }}</span>
+
+                  <span class="label">Кол-во</span>
+                  <span>{{ item.qty }}</span>
+
+                  <span class="label">Цена</span>
+                  <span>{{ item.price }}</span>
+
+                </div>
+
+              </v-card-text>
+            </v-card>
+          </div>
+
+          <!-- DESKTOP PRODUCTS -->
+
+          <v-table v-else-if="tableData.length">
+
+            <thead>
+              <tr>
+                <th>Код ТНВЭД</th>
+                <th>Наименование</th>
+                <th>Вес</th>
+                <th>Кол-во</th>
+                <th>Цена</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr
+                v-for="(item, i) in tableData"
+                :key="i"
+              >
+                <td>{{ item.hsCode }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.weight }}</td>
+                <td>{{ item.qty }}</td>
+                <td>{{ item.price }}</td>
+              </tr>
+
+            </tbody>
+
+          </v-table>
+
+          <!-- SEND BUTTON -->
+
+          <v-btn
+            color="primary"
+            class="mt-4"
+            block
+            @click="sendProductsToServer"
+          >
+            Отправить на сервер
+          </v-btn>
+
+        </v-col>
+
+      </v-row>
+    </v-card-text>
+
+  </v-card>
+</v-dialog>
     </v-card>
   </v-container>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
@@ -215,7 +290,7 @@ definePageMeta({
 })
 
 import { ref, defineAsyncComponent, onMounted, watch, onBeforeUnmount } from 'vue'
-import type { DvhListItem } from '~/types/products'
+import type { DvhCarsListItem } from '~/types/products'
 import Cookies from 'js-cookie'
 import CarsService from '~/services/CarsService'
 import PDFService from '~/services/PDFService'
@@ -233,7 +308,7 @@ const dvhHeaders = [
   { title: 'Номер ДВХ', value: 'dvh_number' },
   { title: 'Дата создания', value: 'arrival_date' },
   { title: 'Оператор', value: 'operator_who_registered' },
-  { title: 'Владелец', value: 'product_owner' }
+  { title: 'Владелец', value: 'car_owner.name' }
 ]
 
 /* ==================== UTILS ==================== */
@@ -255,7 +330,7 @@ function formatDateTime(dateStr: string | null) {
 
 const today = formatDate(new Date())
 
-const dvhList = ref<DvhListItem[]>([])
+const dvhList = ref<DvhCarsListItem[]>([])
 const pagination = ref({ currentPage: 1, pageSize: 10, totalItems: 0 })
 const loading = ref(false)
 
@@ -345,11 +420,11 @@ async function handleFileUpload(event: Event) {
 
 /* ==================== OWNER ==================== */
 
+const DEFAULT_INN = '1234567891234567890'
+
 const findOwnerByInn = async () => {
-  if (!ownerInn.value) {
-    ownerError.value = 'Введите ИНН'
-    return
-  }
+
+  const inn = ownerInn.value || DEFAULT_INN
 
   ownerLoading.value = true
   ownerError.value = null
@@ -357,8 +432,9 @@ const findOwnerByInn = async () => {
   carOwnerId.value = null
 
   try {
+
     const res = await fetch(
-      `http://46.8.24.33/api/owners/find-by-inn?inn=${ownerInn.value}`
+      `http://46.8.24.33/api/owners/find-by-inn?inn=${inn}`
     )
 
     if (!res.ok) throw new Error()
@@ -372,25 +448,23 @@ const findOwnerByInn = async () => {
     carOwnerId.value = owner.id
 
   } catch {
+
     ownerError.value = 'Владелец не найден'
+
   } finally {
+
     ownerLoading.value = false
+
   }
 }
 
 /* ==================== SEND TO SERVER ==================== */
 
+
 const sendProductsToServer = async () => {
 
   if (!warehouseId.value) {
     snackbarMessage.value = 'Склад не определён'
-    snackbarColor.value = 'error'
-    snackbar.value = true
-    return
-  }
-
-  if (!carOwnerId.value) {
-    snackbarMessage.value = 'Сначала найдите владельца по ИНН'
     snackbarColor.value = 'error'
     snackbar.value = true
     return
@@ -405,55 +479,89 @@ const sendProductsToServer = async () => {
 
   try {
 
-    /* 🔥 Создаём массив payload */
-const payload = tableData.value.flatMap((product) => {
-  const count = Number(product.qty) || 1
+    /* ===== если владелец не найден — ищем автоматически ===== */
 
-  return Array.from({ length: count }).map(() => ({
-    name: product.name,
-    tnved_code: product.hsCode,
-    guid: uuidv4(),
-    weight: Number(product.weight),
-    price: Number(product.price),
-    currency: product.currency || 'USD',
+    if (!carOwnerId.value) {
 
-    dvh_number: product.dvh_number,
-    vin_code: product.vin_code,
-    sender: product.sender,
-    recipient: product.recipient,
+      const inn = ownerInn.value || DEFAULT_INN
 
-    car_year: '',
-    released: false,
-    operator_who_registered: localStorage.getItem('user_name') || '',
-    operator_who_released: null,
-    deleted: false,
-    declaration_number: '',
-    transit_declaration_number: '',
-    arrival_date: new Date(),
-    departure_date: null,
-    count_of_days_in_storage: 0,
-    price_for_storage: 0,
-    type: 'SUV',
-    carrier_name: carrier_name.value || 'Неизвестный перевозчик',
+      const res = await fetch(
+        `http://46.8.24.33/api/owners/find-by-inn?inn=${inn}`
+      )
 
-    car_ownerId: carOwnerId.value,
-    warehouseId: warehouseId.value
-  }))
-})
+      if (!res.ok) throw new Error()
 
-    /* 🔥 Отправляем массив */
+      const data = await res.json()
+      const owner = data?.[0]
+
+      if (!owner?.id) {
+        throw new Error('Владелец не найден')
+      }
+
+      carOwnerId.value = owner.id
+      ownerData.value = owner
+    }
+
+    /* ===== формируем payload ===== */
+
+    const payload = tableData.value.flatMap((product) => {
+
+      const count = Number(product.qty) || 1
+
+      return Array.from({ length: count }).map(() => ({
+
+        name: product.name,
+        tnved_code: product.hsCode,
+        guid: uuidv4(),
+        weight: Number(product.weight),
+        price: Number(product.price),
+        currency: product.currency || 'USD',
+
+        dvh_number: product.dvh_number,
+        vin_code: product.vin_code,
+        sender: product.sender,
+        recipient: product.recipient,
+
+        car_year: '',
+        released: false,
+        operator_who_registered: localStorage.getItem('user_name') || '',
+        operator_who_released: null,
+        deleted: false,
+
+        declaration_number: '',
+        transit_declaration_number: '',
+
+        arrival_date: new Date(),
+        departure_date: null,
+        count_of_days_in_storage: 0,
+        price_for_storage: 0,
+
+        type: 'SUV',
+
+        carrier_name: carrier_name.value || 'Неизвестный перевозчик',
+
+        car_ownerId: carOwnerId.value,
+        warehouseId: warehouseId.value
+
+      }))
+    })
+
     await CarsService.createCar(payload)
 
     snackbarMessage.value = `Успешно добавлено машин: ${payload.length}`
     snackbarColor.value = 'success'
     snackbar.value = true
+
     isDialogOpen.value = false
 
   } catch (e) {
+
     console.error(e)
+
     snackbarMessage.value = 'Ошибка отправки данных'
     snackbarColor.value = 'error'
     snackbar.value = true
+
   }
 }
 /* ==================== WATCH ==================== */

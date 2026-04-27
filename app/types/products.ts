@@ -8,6 +8,7 @@ export interface Product {
  currency: string;
  dvh_number: string;
  product_owner: string;
+    car_owner?: { name: string } | null; // Добавляем поле для владельца автомобиля
  released: boolean;
  operator_who_registered: string;
  operator_who_released?: string | null;
@@ -44,7 +45,12 @@ export interface PaginatedResponse<T> {
 // Специально для твоего DVH списка
 export type DvhListItem = Pick<
  Product,
- 'dvh_number' | 'product_owner' | 'operator_who_registered' | 'arrival_date'
+ 'dvh_number' | 'product_owner' | 'operator_who_registered' | 'arrival_date' | 'departure_date' 
+>;
+
+export type DvhCarsListItem = Pick<
+ Product,
+ 'dvh_number' | 'operator_who_registered' | 'arrival_date' | 'departure_date' | 'car_owner'
 >;
 
 export type DvhListResponse = PaginatedResponse<DvhListItem>;
